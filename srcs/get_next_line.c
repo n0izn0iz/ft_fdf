@@ -5,116 +5,110 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nmeier <nmeier@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2014/11/11 12:33:21 by nmeier            #+#    #+#             */
-/*   Updated: 2014/11/13 16:59:03 by nmeier           ###   ########.fr       */
+/*   Created: 2014/12/08 11:54:13 by nmeier            #+#    #+#             */
+/*   Updated: 2014/12/08 11:54:18 by nmeier           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <unistd.h>
 #include "libft.h"
 #include "get_next_line.h"
+#include <stdlib.h>
+#include <unistd.h>
 
-static t_line_buffer	*find_buffer(int const fd, t_list **listptr)
-{
-	t_line_buffer	*l_buf;
-	t_list			*list;
-	t_list			*prev;
-
-	list = *listptr;
-	prev = NULL;
-	while (list)
-	{
-		l_buf = (t_line_buffer*)(list->content);
-		if (l_buf->fd == fd)
-			return (list->content);
-		prev = list;
-		list = list->next;
-	}
-	l_buf = malloc(sizeof(t_line_buffer));
-	l_buf->fd = fd;
-	l_buf->str = NULL;
-	if (prev && (prev->next = ft_lstnew(l_buf, sizeof(t_line_buffer))))
-		return (prev->next->content);
-	*listptr = ft_lstnew(l_buf, sizeof(t_line_buffer));
-	free(l_buf);
-	if (!*listptr || (prev && !prev->next))
-		return (NULL);
-	return ((*listptr)->content);
-}
-
-static int				check_buffer(char **stbuf, char **line)
+static int		check_buffer(char **buffer, char **line)
 {
 	int		i;
 	char	*tmp;
 
-	i = 0;
-	while ((*stbuf)[i] != '\0')
-	{
-		if ((*stbuf)[i] == '\n')
+	if (!(*buffer))
+		return (0);
+	i = -1;
+	while ((*buffer)[++i])
+		if ((*buffer)[i] == '\n')
 		{
-			*line = ft_strsub(*stbuf, 0, i);
-			tmp = *stbuf;
-			*stbuf = ft_strdup((*stbuf) + i + 1);
-			free(tmp);
-			if (!*line || !*stbuf)
+			*line = ft_strsub(*buffer, 0, i);
+			if (!(*line))
 				return (-1);
-			return (1);
-		}
-		i++;
-	}
-	return (0);
-}
-
-static int				loop(char *str, char **stbuf, char **line)
-{
-	char	*tmp;
-	int		i;
-
-	i = 0;
-	while (str[i] != '\0')
-	{
-		if (str[i] == '\n')
-		{
-			if (*stbuf)
+			if (ft_strlen((*buffer) + i + 1))
 			{
-				tmp = ft_strsub(str, 0, i);
-				*line = ft_strjoin(*stbuf, tmp);
-				ft_strdel(stbuf);
+				tmp = *buffer;
+				*buffer = ft_strdup((*buffer) + i + 1);
+				if (!(*buffer))
+					return (-1);
 				free(tmp);
 			}
 			else
-				*line = ft_strsub(str, 0, i);
-			*stbuf = ft_strdup(str + i + 1);
-			if (!*stbuf || !*line)
-				return (-1);
+				ft_strdel(buffer);
 			return (1);
 		}
-		i++;
-	}
 	return (0);
 }
 
-int						get_next_line(int const fd, char **line)
+static int		recheck_buffer(int read_bytes, char **buffer, char **line)
 {
-	int				status;
-	int				read_bytes;
-	char			str[BUFF_SIZE + 1];
-	t_line_buffer	*l_buf;
-	static t_list	*list = NULL;
+	if (read_bytes == 0 && *buffer)
+	{
+		*line = ft_strdup(*buffer);
+		if (!(*line))
+			return (-1);
+		ft_strdel(buffer);
+		return (1);
+	}
+	return (read_bytes);
+}
 
+static int		find_new_line(char **buffer, char **line, char *str)
+{
+	int i;
+
+	i = -1;
+	while (str[++i])
+		if (str[i] == '\n')
+		{
+			str[i] = '\0';
+			if (*buffer)
+			{
+				*line = ft_strjoin(*buffer, str);
+				ft_strdel(buffer);
+			}
+			else
+				*line = ft_strdup(str);
+			if (!(*line))
+				return (-1);
+			if (ft_strlen(str + i + 1))
+			{
+				*buffer = ft_strdup(str + i + 1);
+				if (!(*buffer))
+					return (-1);
+			}
+			return (1);
+		}
+	return (0);
+}
+
+int				get_next_line(int const fd, char **line)
+{
+	static char		*buffer = NULL;
+	char			str[BUFF_SIZE + 1];
+	int				read_bytes;
+	int				status;
+	char			*tmp;
+
+	ft_bzero(str, BUFF_SIZE + 1);
 	if (fd < 0 || !line)
 		return (-1);
-	l_buf = find_buffer(fd, &list);
-	if (l_buf->str != NULL && (status = check_buffer(&(l_buf->str), line)) != 0)
+	if ((status = check_buffer(&buffer, line)))
 		return (status);
 	while ((read_bytes = read(fd, str, BUFF_SIZE)) > 0)
 	{
-		str[read_bytes] = '\0';
-		if ((status = loop(str, &(l_buf->str), line)))
+		if ((status = find_new_line(&buffer, line, str)))
 			return (status);
+		tmp = buffer;
+		buffer = buffer ? ft_strjoin(tmp, str) : ft_strdup(str);
+		if (!buffer)
+			return (-1);
+		free(tmp);
+		ft_bzero(str, BUFF_SIZE + 1);
 	}
-	if (read_bytes < 0)
-		return (-1);
-	return (0);
+	return (recheck_buffer(read_bytes, &buffer, line));
 }
