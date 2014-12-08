@@ -38,22 +38,12 @@ float		ft_fmax(float a, float b)
 	return (b);
 }
 
-static int	hexchartoi(char c)
-{
-	c = ft_toupper(c);
-	if (ft_isdigit(c))
-		return (c - '0');
-	else if ('A' <= c && c <= 'F')
-		return (c - 'A' + 10);
-	else
-		return (0);
-}
-
 int			ft_hexstrtoi(char *str)
 {
-	int len;
-	int i;
-	int result;
+	int		len;
+	int		i;
+	int		result;
+	char	c;
 
 	if (*(str++) != '0' || *(str++) != 'x')
 		return (0);
@@ -62,7 +52,15 @@ int			ft_hexstrtoi(char *str)
 	i = 0;
 	while (i < len)
 	{
-		result += hexchartoi(str[len - i - 1]) << (i * 4);
+		c = str[len - i - 1];
+			c = ft_toupper(c);
+		if (ft_isdigit(c))
+			c = (c - '0');
+		else if ('A' <= c && c <= 'F')
+			c = (c - 'A' + 10);
+		else
+			c = 0;
+		result += (c << (i * 4));
 		i++;
 	}
 	return (result);

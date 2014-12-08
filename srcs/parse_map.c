@@ -82,11 +82,13 @@ static void		fillmap(t_list *lst, t_map *map, int size)
 	}
 	while (lst != NULL && y < map->lines_nbr)
 	{
-		map->max_line_width = ft_max(map->max_line_width, process_split(lst, map, y, size));
+		map->max_line_width = ft_max(map->max_line_width,
+			process_split(lst, map, y, size));
 		y++;
 		lst = lst->next;
 	}
-	map->scale = ft_fmax((WIN_WID / (float)((map->max_line_width) * size)), WIN_HEI / (float)((map->lines_nbr) * size));
+	map->scale = ft_fmax((WIN_WID / (float)((map->max_line_width) * size)),
+		WIN_HEI / (float)((map->lines_nbr) * size));
 }
 
 t_map			*parse_map(char *filename, int size)

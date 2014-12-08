@@ -12,7 +12,6 @@
 
 #include <mlx.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "fdf.h"
 #include "libft.h"
 
@@ -81,8 +80,8 @@ int		main(int argc, char **argv)
 	env.mlx_win = mlx_new_window(env.mlx_ptr, WIN_WID, WIN_HEI, "fdf");
 	env.mlx_img = NULL;
 	env.map = parse_map(argv[1], 20);
-	printf("max_d:%d\n", env.map->max_depth);
 	env.persp = PERSP_ORT;
+	ft_putendl("Orthographic perspective");
 	mlx_expose_hook(env.mlx_win, exposefunc, &env);
 	mlx_key_hook(env.mlx_win, keyfunc, &env);
 	mlx_loop(env.mlx_ptr);

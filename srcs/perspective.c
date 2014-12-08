@@ -36,7 +36,7 @@ void		par_persp(t_point *point, float w, float a)
 		(cos(a) * point->z);
 }
 
-void		applypersp(t_point *point, int xbase, int ybase, t_env* env)
+void		applypersp(t_point *point, int xbase, int ybase, t_env *env)
 {
 	if (env->persp == PERSP_TRI)
 		par_persp(point, RAD(30.f), RAD(45.f));
