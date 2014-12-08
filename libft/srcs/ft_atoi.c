@@ -22,14 +22,6 @@ static int	ft_numlen(const char *str)
 	return (i);
 }
 
-static int	ft_pow(int i, int p)
-{
-	if (p == 0)
-		return (1);
-	else
-		return (ft_pow(i, p - 1) * i);
-}
-
 static int	ft_atoui(const char *str)
 {
 	int i;
@@ -68,8 +60,8 @@ int			ft_atoi(const char *str)
 		str++;
 	while (*str && is_sign(*str))
 	{
-		if (*(str+1) && ft_isdigit(*(str+1)))
-			break;
+		if (*(str + 1) && ft_isdigit(*(str + 1)))
+			break ;
 		str++;
 	}
 	if (*str == '-')

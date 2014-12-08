@@ -52,8 +52,7 @@ int			ft_hexstrtoi(char *str)
 	i = 0;
 	while (i < len)
 	{
-		c = str[len - i - 1];
-			c = ft_toupper(c);
+		c = ft_toupper(str[len - i - 1]);
 		if (ft_isdigit(c))
 			c = (c - '0');
 		else if ('A' <= c && c <= 'F')

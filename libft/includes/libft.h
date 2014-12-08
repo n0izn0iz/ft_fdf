@@ -85,5 +85,6 @@ t_list			*ft_lstmap(t_list *lst, t_list *(*f)(t_list *elem));
 
 char			**ft_strsplitnbrs(char const *s);
 void			ft_swap(int *a, int *b);
+int				ft_pow(int i, int p);
 
 #endif
